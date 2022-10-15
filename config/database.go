@@ -29,7 +29,7 @@ func ConnectDB() *gorm.DB{
 
 func MigrateDatabase(db *gorm.DB){
 	db.AutoMigrate(
-		&models.User{},
+		&models.User{},&models.UserToken{},
 	)
 
 	fmt.Println("Database Migration has been success")

@@ -9,6 +9,7 @@ import(
 
 
 func InitRouter(){
+	UserHandler := handler.NewUserHandler()
 	r := gin.Default()
 	api := r.Group("/api/v1")
 
@@ -18,5 +19,7 @@ func InitRouter(){
 		})
 	})
 	api.GET("/user/health", handler.HealthUser)
+	api.POST("/user/register", UserHandler.CreateUser)
+	api.POST("/user/login", UserHandler.LoginUser)
 	r.Run()
 }

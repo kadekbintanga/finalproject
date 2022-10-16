@@ -27,5 +27,8 @@ func InitRouter(){
 	api.DELETE("/user", middleware.CheckAuth, UserHandler.DeleteUser)
 	api.GET("/photo/health", handler.HealthPhoto)
 	api.POST("/photo", middleware.CheckAuth, PhotoHandler.CreatePhoto)
+	api.GET("/photo", middleware.CheckAuth, PhotoHandler.GetPhoto)
+	api.PUT("/photo/:photo_id", middleware.CheckAuth, PhotoHandler.UpdatePhoto)
+	api.DELETE("/photo/:photo_id", middleware.CheckAuth, PhotoHandler.DeletePhoto)
 	r.Run()
 }

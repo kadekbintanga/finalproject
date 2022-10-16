@@ -12,6 +12,7 @@ import(
 func InitRouter(){
 	UserHandler := handler.NewUserHandler()
 	PhotoHandler := handler.NewPhotoHandler()
+	CommentHandler := handler.NewCommentHandler()
 	r := gin.Default()
 	api := r.Group("/api/v1")
 
@@ -30,5 +31,7 @@ func InitRouter(){
 	api.GET("/photo", middleware.CheckAuth, PhotoHandler.GetPhoto)
 	api.PUT("/photo/:photo_id", middleware.CheckAuth, PhotoHandler.UpdatePhoto)
 	api.DELETE("/photo/:photo_id", middleware.CheckAuth, PhotoHandler.DeletePhoto)
+	api.GET("/comment/health", handler.HealthComment)
+	api.POST("/comment", middleware.CheckAuth, CommentHandler.CreateComment)
 	r.Run()
 }

@@ -7,9 +7,11 @@ import(
 	"finalproject/app/repository"
 	"finalproject/app/resource"
 	"finalproject/app/helpers"
-	// "fmt"
+	"fmt"
 	"github.com/go-playground/validator/v10"
 	"golang.org/x/crypto/bcrypt"
+	"strings"
+	"strconv"
 )
 
 type UserHandler struct{
@@ -146,5 +148,131 @@ func (h *UserHandler) LoginUser(c *gin.Context){
 	}
 
 	response := gin.H{"token":generateToken}
+	c.JSON(http.StatusOK, response)
+}
+
+func(h *UserHandler) UpdateUser(c *gin.Context){
+	repo :=h.repo
+	user_id,_ := strconv.ParseUint(c.DefaultQuery("user_id","0"), 10, 64)
+	var req resource.UpdateUser
+	err := c.ShouldBind(&req)
+	if err != nil {
+		errors := helpers.FormatValidationErrorBinding(err)
+		errorMessage := gin.H{"message":errors}
+		response := helpers.APIResponseFailed("bad request", http.StatusBadRequest, "error", errorMessage)
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+	validate := validator.New()
+	err = validate.Struct(req)
+	if err != nil {
+		errors := helpers.FormatValidationErrorPlayground(err)
+		errorMessage := gin.H{"message":errors}
+		response := helpers.APIResponseFailed("bad request", http.StatusBadRequest, "error", errorMessage)
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+	tokenHeader := c.Request.Header.Get("Authorization")
+	tokenArr := strings.Split(tokenHeader, "Bearer ")
+	tokenStr := tokenArr[1]
+	getEmailToken, err := helpers.ValidateToken(tokenStr)
+	if err != nil {
+		errors := "Something went wrong"
+		errorMessage := gin.H{"message":errors}
+		response := helpers.APIResponseFailed("bad request", http.StatusBadRequest, "error", errorMessage)
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+	email := fmt.Sprint(getEmailToken["email"])
+	dataUser,err := repo.GetUserByEmail(email)
+	if err != nil {
+		errors := "Unauthorized"
+		errorMessage := gin.H{"message":errors}
+		response := helpers.APIResponseFailed("bad request", http.StatusBadRequest, "error", errorMessage)
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+	if dataUser.ID == nil{
+		errors := "Unauthorized"
+		errorMessage := gin.H{"message":errors}
+		response := helpers.APIResponseFailed("bad request", http.StatusBadRequest, "error", errorMessage)
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+	num := uint(user_id) 
+	if *dataUser.ID != num{
+		errors := "Invalid parameter user_id"
+		errorMessage := gin.H{"message":errors}
+		response := helpers.APIResponseFailed("bad request", http.StatusBadRequest, "error", errorMessage)
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+	User := models.User{
+		Email: req.Email,
+		Username: req.Username,
+	}
+	update, err := repo.UpdateUser(dataUser.ID, User)
+	if err != nil {
+		errors := helpers.FormatValidationErrorSQL(err)
+		errorMessage := gin.H{"message":errors}
+		response := helpers.APIResponseFailed("bad request", http.StatusBadRequest, "error", errorMessage)
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+
+	data := gin.H{
+		"id":update.ID,
+		"email":update.Email,
+		"username":update.Username,
+		"age":dataUser.Age,
+		"updated_at":update.UpdatedAt,
+	}
+	response := helpers.APIResponse("Success", http.StatusOK,0,0,0, data)
+	c.JSON(http.StatusOK, response)
+}
+
+func(h *UserHandler) DeleteUser(c *gin.Context){
+	repo := h.repo
+	tokenHeader := c.Request.Header.Get("Authorization")
+	tokenArr := strings.Split(tokenHeader, "Bearer ")
+	tokenStr := tokenArr[1]
+	getEmailToken, err := helpers.ValidateToken(tokenStr)
+	if err != nil {
+		errors := "Something went wrong"
+		errorMessage := gin.H{"message":errors}
+		response := helpers.APIResponseFailed("bad request", http.StatusBadRequest, "error", errorMessage)
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+	email := fmt.Sprint(getEmailToken["email"])
+	userData, err := repo.GetUserByEmail(email)
+	if err != nil {
+		errors := "User not found"
+		errorMessage := gin.H{"message":errors}
+		response := helpers.APIResponseFailed("bad request", http.StatusBadRequest, "error", errorMessage)
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+	err = repo.DeleteUser(email)
+	if err != nil {
+		errors := "Something went wrong"
+		errorMessage := gin.H{"message":errors}
+		response := helpers.APIResponseFailed("bad request", http.StatusBadRequest, "error", errorMessage)
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+	err = repo.DeleteToken(userData.ID)
+	if err != nil {
+		errors := "Something went wrong"
+		errorMessage := gin.H{"message":errors}
+		response := helpers.APIResponseFailed("bad request", http.StatusBadRequest, "error", errorMessage)
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+
+	data := gin.H{
+		"message":"Your account has been successfuly deleted",
+	}
+	response := helpers.APIResponse("Success", http.StatusOK,0,0,0, data)
 	c.JSON(http.StatusOK, response)
 }

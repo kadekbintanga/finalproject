@@ -9,9 +9,11 @@ import(
 type UserRepository interface{
 	CreateUser(User models.User)(models.User, error)
 	GetUserByEmail(email string)(models.User, error)
-	GetToken(user_id uint)(models.UserToken, error)
+	GetToken(user_id *uint)(models.UserToken, error)
 	AddToken(UserToken models.UserToken)(models.UserToken, error)
-	DeleteToken(id uint)error
+	DeleteToken(user_id *uint)error
+	UpdateUser(id *uint, User models.User)(models.User, error)
+	DeleteUser(email string)error
 }
 
 func NewUserRepository() UserRepository{
@@ -38,7 +40,7 @@ func (db *dbConnection) GetUserByEmail(email string)(models.User, error){
 	return User, nil
 }
 
-func (db *dbConnection) GetToken(user_id uint)(models.UserToken, error){
+func (db *dbConnection) GetToken(user_id *uint)(models.UserToken, error){
 	var UserToken models.UserToken
 	connection := db.connection.Where("user_id = ?", user_id).Find(&UserToken)
 	err := connection.Error
@@ -56,9 +58,26 @@ func (db *dbConnection) AddToken(UserToken models.UserToken)(models.UserToken, e
 	return UserToken, nil
 }
 
-func (db *dbConnection) DeleteToken(id uint)error{
+func (db *dbConnection) DeleteToken(user_id *uint)error{
 	var UserToken models.UserToken
-	err := db.connection.Delete(&UserToken, id).Error
+	err := db.connection.Where("user_id= ?", user_id).Delete(&UserToken).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func(db *dbConnection) UpdateUser(id *uint, User models.User)(models.User, error){
+	err := db.connection.Model(&User).Where("id = ?", id).Updates(&User).Error
+	if err != nil {
+		return User, err
+	}
+	return User, nil
+}
+
+func (db *dbConnection) DeleteUser(email string)error{
+	var  User models.User
+	err := db.connection.Where("email= ?", email).Delete(&User).Error
 	if err != nil {
 		return err
 	}

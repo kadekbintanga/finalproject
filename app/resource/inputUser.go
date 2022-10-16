@@ -13,3 +13,8 @@ type LoginUser struct{
 	Email			string		`json:"email" binding:"required" validate:"email"`
 	Password		string		`json:"password" binding:"required,min=6"`
 }
+
+type UpdateUser struct{
+	Email			string		`json:"email" binding:"required" validate:"email"`
+	Username		string		`json:"username" binding:"required"`
+}

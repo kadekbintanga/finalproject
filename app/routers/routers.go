@@ -13,6 +13,7 @@ func InitRouter(){
 	UserHandler := handler.NewUserHandler()
 	PhotoHandler := handler.NewPhotoHandler()
 	CommentHandler := handler.NewCommentHandler()
+	SocialMediaHandler := handler.NewSocialMediaHandler()
 	r := gin.Default()
 	api := r.Group("/api/v1")
 
@@ -33,5 +34,13 @@ func InitRouter(){
 	api.DELETE("/photo/:photo_id", middleware.CheckAuth, PhotoHandler.DeletePhoto)
 	api.GET("/comment/health", handler.HealthComment)
 	api.POST("/comment", middleware.CheckAuth, CommentHandler.CreateComment)
+	api.GET("/comment/:photo_id", middleware.CheckAuth, CommentHandler.GetComment)
+	api.PUT("/comment/:comment_id", middleware.CheckAuth, CommentHandler.UpdateComment)
+	api.DELETE("/comment/:comment_id", middleware.CheckAuth, CommentHandler.DeleteComment)
+	api.GET("/socialmedia/health", handler.HealthSocialMedia)
+	api.POST("/socialmedia", middleware.CheckAuth, SocialMediaHandler.CreateSocialMedia)
+	api.GET("/socialmedia", middleware.CheckAuth, SocialMediaHandler.GetSocialMedia)
+	api.PUT("/socialmedia/:socialmedia_id", middleware.CheckAuth, SocialMediaHandler.UpdateSocialMedia)
+	api.DELETE("/socialmedia/:socialmedia_id", middleware.CheckAuth, SocialMediaHandler.DeleteSocialMedia)
 	r.Run()
 }

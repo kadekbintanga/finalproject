@@ -92,7 +92,7 @@ func (h *PhotoHandler) CreatePhoto(c *gin.Context){
 	c.JSON(http.StatusOK, response)
 }
 
-func (h *PhotoHandler) GetPhoto(c *gin.Context){
+func (h *PhotoHandler) GetPhotoUser(c *gin.Context){
 	repoUser := h.repo
 	repoPhoto := h.repoP
 
@@ -119,7 +119,7 @@ func (h *PhotoHandler) GetPhoto(c *gin.Context){
 
 	result, err := repoPhoto.GetPhotobyUserId(dataUser.ID)
 	if err != nil {
-		errors := helpers.FormatValidationErrorSQL(err)
+		errors := "Something went wrong"
 		errorMessage := gin.H{"message":errors}
 		response := helpers.APIResponseFailed("bad request", http.StatusBadRequest, "error", errorMessage)
 		c.AbortWithStatusJSON(http.StatusBadRequest, response)
@@ -149,7 +149,41 @@ func (h *PhotoHandler) GetPhoto(c *gin.Context){
 	c.JSON(http.StatusOK, response)
 }
 
+func (h *PhotoHandler) GetAllPhoto(c *gin.Context){
+	repoPhoto := h.repoP
+	result, err := repoPhoto.GetAllPhoto()
+	if err != nil {
+		errors := "Something went wrong"
+		errorMessage := gin.H{"message":errors}
+		response := helpers.APIResponseFailed("bad request", http.StatusBadRequest, "error", errorMessage)
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+
+	var data []map[string]interface{}
+	for _, value := range result{
+		d := gin.H{
+			"id": value.ID,
+			"title": value.Title,
+			"caption": value.Caption,
+			"photo_url": value.PhotoUrl,
+			"user_id": value.UserID,
+			"created_at": value.CreatedAt,
+			"updated_at": value.UpdatedAt,
+			"User": gin.H{
+				"email": value.User.Email,
+				"username": value.User.Username,
+			},
+		}
+		data = append(data, d)
+	}
+
+	response := helpers.APIResponse("Success", http.StatusOK,0,0,0, data)
+	c.JSON(http.StatusOK, response)
+}
+
 func (h *PhotoHandler) UpdatePhoto(c *gin.Context){
+	repoUser := h.repo
 	repoPhoto := h.repoP
 	photoId,_ := strconv.ParseUint(c.Param("photo_id"),10,64)
 	var req resource.InputPhoto
@@ -157,6 +191,33 @@ func (h *PhotoHandler) UpdatePhoto(c *gin.Context){
 	if err != nil {
 		fmt.Println(err)
 		errors := helpers.FormatValidationErrorBinding(err)
+		errorMessage := gin.H{"message":errors}
+		response := helpers.APIResponseFailed("bad request", http.StatusBadRequest, "error", errorMessage)
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+	tokenHeader := c.Request.Header.Get("Authorization")
+	tokenArr := strings.Split(tokenHeader, "Bearer ")
+	tokenStr := tokenArr[1]
+	getEmailToken, err := helpers.ValidateToken(tokenStr)
+	if err != nil {
+		errors := "Something went wrong"
+		errorMessage := gin.H{"message":errors}
+		response := helpers.APIResponseFailed("bad request", http.StatusBadRequest, "error", errorMessage)
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+	email := fmt.Sprint(getEmailToken["email"])
+	dataUser,err := repoUser.GetUserByEmail(email)
+	if err != nil {
+		errors := "Unauthorized"
+		errorMessage := gin.H{"message":errors}
+		response := helpers.APIResponseFailed("bad request", http.StatusBadRequest, "error", errorMessage)
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+	if dataUser.ID == nil{
+		errors := "Unauthorized"
 		errorMessage := gin.H{"message":errors}
 		response := helpers.APIResponseFailed("bad request", http.StatusBadRequest, "error", errorMessage)
 		c.AbortWithStatusJSON(http.StatusBadRequest, response)
@@ -172,6 +233,13 @@ func (h *PhotoHandler) UpdatePhoto(c *gin.Context){
 		return
 	}
 	if checkPhoto.ID == nil{
+		errors := "Photo not found"
+		errorMessage := gin.H{"message":errors}
+		response := helpers.APIResponseFailed("bad request", http.StatusBadRequest, "error", errorMessage)
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+	if *dataUser.ID != *checkPhoto.UserID{
 		errors := "Photo not found"
 		errorMessage := gin.H{"message":errors}
 		response := helpers.APIResponseFailed("bad request", http.StatusBadRequest, "error", errorMessage)
@@ -207,10 +275,39 @@ func (h *PhotoHandler) UpdatePhoto(c *gin.Context){
 }
 
 func(h *PhotoHandler) DeletePhoto(c *gin.Context){
+	repoUser := h.repo
 	repoPhoto := h.repoP
 	photoId,_ := strconv.ParseUint(c.Param("photo_id"),10,64)
-	id := uint(photoId)
 
+	tokenHeader := c.Request.Header.Get("Authorization")
+	tokenArr := strings.Split(tokenHeader, "Bearer ")
+	tokenStr := tokenArr[1]
+	getEmailToken, err := helpers.ValidateToken(tokenStr)
+	if err != nil {
+		errors := "Something went wrong"
+		errorMessage := gin.H{"message":errors}
+		response := helpers.APIResponseFailed("bad request", http.StatusBadRequest, "error", errorMessage)
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+	email := fmt.Sprint(getEmailToken["email"])
+	dataUser,err := repoUser.GetUserByEmail(email)
+	if err != nil {
+		errors := "Unauthorized"
+		errorMessage := gin.H{"message":errors}
+		response := helpers.APIResponseFailed("bad request", http.StatusBadRequest, "error", errorMessage)
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+	if dataUser.ID == nil{
+		errors := "Unauthorized"
+		errorMessage := gin.H{"message":errors}
+		response := helpers.APIResponseFailed("bad request", http.StatusBadRequest, "error", errorMessage)
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+
+	id := uint(photoId)
 	checkPhoto, err := repoPhoto.GetPhotobyId(id)
 	if err != nil {
 		errors := helpers.FormatValidationErrorBinding(err)
@@ -227,6 +324,14 @@ func(h *PhotoHandler) DeletePhoto(c *gin.Context){
 		return
 	}
 
+	if *dataUser.ID != *checkPhoto.UserID{
+		errors := "Photo not found"
+		errorMessage := gin.H{"message":errors}
+		response := helpers.APIResponseFailed("bad request", http.StatusBadRequest, "error", errorMessage)
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+	
 	err = repoPhoto.DeletePhoto(id)
 	if err != nil {
 		errors := "Something went wrong"

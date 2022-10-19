@@ -158,12 +158,40 @@ func(h *CommentHandler) GetComment(c *gin.Context){
 
 func (h *CommentHandler) UpdateComment(c *gin.Context){
 	repoComment:= h.repoC
+	repoUser := h.repo
 	comentId,_ := strconv.ParseUint(c.Param("comment_id"),10,64)
 	var req resource.UpdateComment
 	err := c.ShouldBind(&req)
 	if err != nil {
 		fmt.Println(err)
 		errors := helpers.FormatValidationErrorBinding(err)
+		errorMessage := gin.H{"message":errors}
+		response := helpers.APIResponseFailed("bad request", http.StatusBadRequest, "error", errorMessage)
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+	tokenHeader := c.Request.Header.Get("Authorization")
+	tokenArr := strings.Split(tokenHeader, "Bearer ")
+	tokenStr := tokenArr[1]
+	getEmailToken, err := helpers.ValidateToken(tokenStr)
+	if err != nil {
+		errors := "Something went wrong"
+		errorMessage := gin.H{"message":errors}
+		response := helpers.APIResponseFailed("bad request", http.StatusBadRequest, "error", errorMessage)
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+	email := fmt.Sprint(getEmailToken["email"])
+	dataUser,err := repoUser.GetUserByEmail(email)
+	if err != nil {
+		errors := "Unauthorized"
+		errorMessage := gin.H{"message":errors}
+		response := helpers.APIResponseFailed("bad request", http.StatusBadRequest, "error", errorMessage)
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+	if dataUser.ID == nil{
+		errors := "Unauthorized"
 		errorMessage := gin.H{"message":errors}
 		response := helpers.APIResponseFailed("bad request", http.StatusBadRequest, "error", errorMessage)
 		c.AbortWithStatusJSON(http.StatusBadRequest, response)
@@ -180,6 +208,13 @@ func (h *CommentHandler) UpdateComment(c *gin.Context){
 	}
 	if checkComment.ID == nil{
 		errors := "Photo not found"
+		errorMessage := gin.H{"message":errors}
+		response := helpers.APIResponseFailed("bad request", http.StatusBadRequest, "error", errorMessage)
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+	if *dataUser.ID != *checkComment.UserID{
+		errors := "Comment not found loh"
 		errorMessage := gin.H{"message":errors}
 		response := helpers.APIResponseFailed("bad request", http.StatusBadRequest, "error", errorMessage)
 		c.AbortWithStatusJSON(http.StatusBadRequest, response)
@@ -215,8 +250,37 @@ func (h *CommentHandler) UpdateComment(c *gin.Context){
 
 func(h *CommentHandler) DeleteComment(c *gin.Context){
 	repoComment := h.repoC
+	repoUser := h.repo
 	commentId,_ := strconv.ParseUint(c.Param("comment_id"),10,64)
 	comment_id := uint(commentId)
+
+	tokenHeader := c.Request.Header.Get("Authorization")
+	tokenArr := strings.Split(tokenHeader, "Bearer ")
+	tokenStr := tokenArr[1]
+	getEmailToken, err := helpers.ValidateToken(tokenStr)
+	if err != nil {
+		errors := "Something went wrong"
+		errorMessage := gin.H{"message":errors}
+		response := helpers.APIResponseFailed("bad request", http.StatusBadRequest, "error", errorMessage)
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+	email := fmt.Sprint(getEmailToken["email"])
+	dataUser,err := repoUser.GetUserByEmail(email)
+	if err != nil {
+		errors := "Unauthorized"
+		errorMessage := gin.H{"message":errors}
+		response := helpers.APIResponseFailed("bad request", http.StatusBadRequest, "error", errorMessage)
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+	if dataUser.ID == nil{
+		errors := "Unauthorized"
+		errorMessage := gin.H{"message":errors}
+		response := helpers.APIResponseFailed("bad request", http.StatusBadRequest, "error", errorMessage)
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
 
 	checkComment, err := repoComment.GetCommentbyId(comment_id)
 	if err != nil {
@@ -227,6 +291,13 @@ func(h *CommentHandler) DeleteComment(c *gin.Context){
 		return
 	}
 	if checkComment.ID == nil{
+		errors := "Comment not found"
+		errorMessage := gin.H{"message":errors}
+		response := helpers.APIResponseFailed("bad request", http.StatusBadRequest, "error", errorMessage)
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+	if *dataUser.ID != *checkComment.UserID{
 		errors := "Comment not found"
 		errorMessage := gin.H{"message":errors}
 		response := helpers.APIResponseFailed("bad request", http.StatusBadRequest, "error", errorMessage)

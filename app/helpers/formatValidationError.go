@@ -39,6 +39,18 @@ func FormatValidationErrorBinding(err error) string{
 		}else{
 			return "Age is required"
 		}
+	}else if strings.Contains(err.Error(),"Title"){
+		return "Title is required"
+	}else if strings.Contains(err.Error(),"PhotoUrl"){
+		return "PhotoUrl is required"
+	}else if strings.Contains(err.Error(),"Message"){
+		return "Message is required"
+	}else if strings.Contains(err.Error(),"PhotoID"){
+		return "PhotoID is required"
+	}else if strings.Contains(err.Error(),"Name"){
+		return "Name of social media is required"
+	}else if strings.Contains(err.Error(),"SocialMediaUr"){
+		return "Url of social media  is required"
 	}else if strings.Contains(err.Error(),"username"){
 		return "username must has string type"
 	}else if strings.Contains(err.Error(),"email"){

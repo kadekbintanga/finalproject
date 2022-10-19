@@ -11,6 +11,7 @@ type PhotoRepository interface{
 	GetPhotobyId(id uint)(models.Photo, error)
 	UpdatePhoto(id uint, Photo models.Photo)(models.Photo, error)
 	DeletePhoto(id uint)error
+	GetAllPhoto()([]models.Photo, error)
 }
 
 
@@ -42,6 +43,16 @@ func(db *dbConnection) GetPhotobyUserId(user_id *uint)([]models.Photo, error){
 func(db *dbConnection) GetPhotobyId(id uint)(models.Photo, error){
 	var Photo models.Photo
 	connection := db.connection.Where("id = ?", id).Find(&Photo)
+	err := connection.Error
+	if err != nil{
+		return Photo, err
+	}
+	return Photo, nil
+}
+
+func(db *dbConnection) GetAllPhoto()([]models.Photo, error){
+	var Photo []models.Photo
+	connection := db.connection.Find(&Photo)
 	err := connection.Error
 	if err != nil{
 		return Photo, err

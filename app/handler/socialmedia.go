@@ -148,12 +148,40 @@ func (h *SocialMediaHandler) GetSocialMedia(c *gin.Context){
 
 func(h *SocialMediaHandler) UpdateSocialMedia(c *gin.Context){
 	repoSocialMedia := h.repoS
+	repoUser := h.repo
 	socialMediaId,_ := strconv.ParseUint(c.Param("socialmedia_id"),10,64)
 	var req resource.InputSocialMedia
 	err := c.ShouldBind(&req)
 	if err != nil {
 		fmt.Println(err)
 		errors := helpers.FormatValidationErrorBinding(err)
+		errorMessage := gin.H{"message":errors}
+		response := helpers.APIResponseFailed("bad request", http.StatusBadRequest, "error", errorMessage)
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+	tokenHeader := c.Request.Header.Get("Authorization")
+	tokenArr := strings.Split(tokenHeader, "Bearer ")
+	tokenStr := tokenArr[1]
+	getEmailToken, err := helpers.ValidateToken(tokenStr)
+	if err != nil {
+		errors := "Something went wrong"
+		errorMessage := gin.H{"message":errors}
+		response := helpers.APIResponseFailed("bad request", http.StatusBadRequest, "error", errorMessage)
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+	email := fmt.Sprint(getEmailToken["email"])
+	dataUser,err := repoUser.GetUserByEmail(email)
+	if err != nil {
+		errors := "Unauthorized"
+		errorMessage := gin.H{"message":errors}
+		response := helpers.APIResponseFailed("bad request", http.StatusBadRequest, "error", errorMessage)
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+	if dataUser.ID == nil{
+		errors := "Unauthorized"
 		errorMessage := gin.H{"message":errors}
 		response := helpers.APIResponseFailed("bad request", http.StatusBadRequest, "error", errorMessage)
 		c.AbortWithStatusJSON(http.StatusBadRequest, response)
@@ -169,7 +197,14 @@ func(h *SocialMediaHandler) UpdateSocialMedia(c *gin.Context){
 		return
 	}
 	if checkSocialMedia.ID == nil{
-		errors := "Photo not found"
+		errors := "Social media  not found"
+		errorMessage := gin.H{"message":errors}
+		response := helpers.APIResponseFailed("bad request", http.StatusBadRequest, "error", errorMessage)
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+	if *dataUser.ID != *checkSocialMedia.UserID{
+		errors := "Social Media not found"
 		errorMessage := gin.H{"message":errors}
 		response := helpers.APIResponseFailed("bad request", http.StatusBadRequest, "error", errorMessage)
 		c.AbortWithStatusJSON(http.StatusBadRequest, response)
@@ -204,9 +239,37 @@ func(h *SocialMediaHandler) UpdateSocialMedia(c *gin.Context){
 
 func(h *SocialMediaHandler) DeleteSocialMedia(c *gin.Context){
 	repoSocialMedia := h.repoS
+	repoUser := h.repo
 	socialMediaId,_ := strconv.ParseUint(c.Param("socialmedia_id"),10,64)
 	id := uint(socialMediaId)
 
+	tokenHeader := c.Request.Header.Get("Authorization")
+	tokenArr := strings.Split(tokenHeader, "Bearer ")
+	tokenStr := tokenArr[1]
+	getEmailToken, err := helpers.ValidateToken(tokenStr)
+	if err != nil {
+		errors := "Something went wrong"
+		errorMessage := gin.H{"message":errors}
+		response := helpers.APIResponseFailed("bad request", http.StatusBadRequest, "error", errorMessage)
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+	email := fmt.Sprint(getEmailToken["email"])
+	dataUser,err := repoUser.GetUserByEmail(email)
+	if err != nil {
+		errors := "Unauthorized"
+		errorMessage := gin.H{"message":errors}
+		response := helpers.APIResponseFailed("bad request", http.StatusBadRequest, "error", errorMessage)
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+	if dataUser.ID == nil{
+		errors := "Unauthorized"
+		errorMessage := gin.H{"message":errors}
+		response := helpers.APIResponseFailed("bad request", http.StatusBadRequest, "error", errorMessage)
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
 	checkSocialMedia, err := repoSocialMedia.GetSocialMediabyId(id)
 	if err != nil {
 		errors := helpers.FormatValidationErrorBinding(err)
@@ -216,6 +279,13 @@ func(h *SocialMediaHandler) DeleteSocialMedia(c *gin.Context){
 		return
 	}
 	if checkSocialMedia.ID == nil{
+		errors := "Social Media not found"
+		errorMessage := gin.H{"message":errors}
+		response := helpers.APIResponseFailed("bad request", http.StatusBadRequest, "error", errorMessage)
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+	if *dataUser.ID != *checkSocialMedia.UserID{
 		errors := "Social Media not found"
 		errorMessage := gin.H{"message":errors}
 		response := helpers.APIResponseFailed("bad request", http.StatusBadRequest, "error", errorMessage)

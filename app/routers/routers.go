@@ -11,7 +11,7 @@ import(
 	"os"
 )
 
-var PORT = os.Getenv("DB_PORT")
+var PORT = os.Getenv("PORT")
 
 
 func InitRouter(){
@@ -57,5 +57,5 @@ func InitRouter(){
 	// For local
 	// r.Run()
 	// For deploy
-	r.Run(":80")
+	r.Run(":"+PORT)
 }

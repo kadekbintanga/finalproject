@@ -1,10 +1,13 @@
 package routers
 
 import(
+	_ "finalproject/docs"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"finalproject/app/handler"
 	"finalproject/app/middleware"
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 
@@ -46,5 +49,7 @@ func InitRouter(){
 	api.GET("/socialmedia", middleware.CheckAuth, SocialMediaHandler.GetSocialMedia)
 	api.PUT("/socialmedia/:socialmedia_id", middleware.CheckAuth, SocialMediaHandler.UpdateSocialMedia)
 	api.DELETE("/socialmedia/:socialmedia_id", middleware.CheckAuth, SocialMediaHandler.DeleteSocialMedia)
+
+	api.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 	r.Run()
 }

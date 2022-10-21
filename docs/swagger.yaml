@@ -1,0 +1,701 @@
+basePath: /
+definitions:
+  resource.InputComment:
+    properties:
+      message:
+        example: good foto!
+        type: string
+      photo_id:
+        example: 1
+        type: integer
+    required:
+    - message
+    - photo_id
+    type: object
+  resource.InputPhoto:
+    properties:
+      caption:
+        example: This is my greate team
+        type: string
+      photo_url:
+        example: https://static.wikia.nocookie.net/naruto/images/5/50/Team_Kakashi.png/revision/latest?cb=20161219035928
+        type: string
+      title:
+        example: Selfie with team
+        type: string
+    required:
+    - photo_url
+    - title
+    type: object
+  resource.InputSocialMedia:
+    properties:
+      name:
+        example: Instagram
+        type: string
+      social_media_url:
+        example: www.instagram.com/uzumakinaruto
+        type: string
+    required:
+    - name
+    - social_media_url
+    type: object
+  resource.InputUser:
+    properties:
+      age:
+        example: 20
+        minimum: 9
+        type: integer
+      email:
+        example: testing@gmail.com
+        type: string
+      password:
+        example: test123
+        minLength: 6
+        type: string
+      username:
+        example: testing
+        type: string
+    required:
+    - age
+    - email
+    - password
+    - username
+    type: object
+  resource.LoginUser:
+    properties:
+      email:
+        example: testing@gmail.com
+        type: string
+      password:
+        example: test123
+        minLength: 6
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  resource.UpdateComment:
+    properties:
+      message:
+        example: amazing photo
+        type: string
+    required:
+    - message
+    type: object
+  resource.UpdateUser:
+    properties:
+      email:
+        example: testing@gmail.com
+        type: string
+      username:
+        example: testing
+        type: string
+    required:
+    - email
+    - username
+    type: object
+info:
+  contact:
+    email: kadekbintanga@gmail.com
+    name: API Support
+  description: This is a service for final project
+  license:
+    name: Apache 2.0
+  termsOfService: http://swagger.io/terms/
+  title: Final Project by Bintang
+  version: "1.0"
+paths:
+  /api/v1/allphoto:
+    get:
+      description: Get all photo  without any input
+      parameters:
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              items:
+                type: string
+              type: array
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all  photo handler
+      tags:
+      - Photo
+  /api/v1/comment:
+    post:
+      consumes:
+      - application/json
+      description: Create a photo with the input payload
+      parameters:
+      - description: body data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/resource.InputComment'
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              items:
+                type: string
+              type: array
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create a comment
+      tags:
+      - Comment
+  /api/v1/comment/{comment_id}:
+    delete:
+      consumes:
+      - application/json
+      description: delete a comment with the token
+      parameters:
+      - description: Comment ID
+        in: path
+        name: comment_id
+        required: true
+        type: string
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              items:
+                type: string
+              type: array
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a comment
+      tags:
+      - Comment
+    put:
+      consumes:
+      - application/json
+      description: Update a comment with the input payload
+      parameters:
+      - description: Comment ID
+        in: path
+        name: comment_id
+        required: true
+        type: string
+      - description: body data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/resource.UpdateComment'
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              items:
+                type: string
+              type: array
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update a comment
+      tags:
+      - Comment
+  /api/v1/comment/{photo_id}:
+    get:
+      description: Get comment with bearer token
+      parameters:
+      - description: Photo ID
+        in: path
+        name: photo_id
+        required: true
+        type: string
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              items:
+                type: string
+              type: array
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get comment
+      tags:
+      - Comment
+  /api/v1/comment/health:
+    get:
+      description: Test health without any input
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              items:
+                type: string
+              type: array
+            type: object
+      summary: Test health comment handler
+      tags:
+      - Comment
+  /api/v1/photo:
+    get:
+      description: Get photo with bearer token
+      parameters:
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              items:
+                type: string
+              type: array
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get user photo
+      tags:
+      - Photo
+    post:
+      consumes:
+      - application/json
+      description: Create a photo with the input payload
+      parameters:
+      - description: body data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/resource.InputPhoto'
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              items:
+                type: string
+              type: array
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create a photo
+      tags:
+      - Photo
+  /api/v1/photo/{photo_id}:
+    delete:
+      consumes:
+      - application/json
+      description: delete a photo with the token
+      parameters:
+      - description: Photo ID
+        in: path
+        name: photo_id
+        required: true
+        type: string
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              items:
+                type: string
+              type: array
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a photo
+      tags:
+      - Photo
+    put:
+      consumes:
+      - application/json
+      description: Update a photo with the input payload
+      parameters:
+      - description: Photo ID
+        in: path
+        name: photo_id
+        required: true
+        type: string
+      - description: body data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/resource.InputPhoto'
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              items:
+                type: string
+              type: array
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update a photo
+      tags:
+      - Photo
+  /api/v1/photo/health:
+    get:
+      description: Test health without any input
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              items:
+                type: string
+              type: array
+            type: object
+      summary: Test health photo handler
+      tags:
+      - Photo
+  /api/v1/socialmedia:
+    get:
+      description: Get social media with bearer token
+      parameters:
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              items:
+                type: string
+              type: array
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get user social media
+      tags:
+      - Social Media
+    post:
+      consumes:
+      - application/json
+      description: Create a social media with the input payload
+      parameters:
+      - description: body data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/resource.InputSocialMedia'
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              items:
+                type: string
+              type: array
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create a social media
+      tags:
+      - Social Media
+  /api/v1/socialmedia/{socialmedia_id}:
+    delete:
+      consumes:
+      - application/json
+      description: delete a social media with the token
+      parameters:
+      - description: SocialMedia ID
+        in: path
+        name: socialmedia_id
+        required: true
+        type: string
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              items:
+                type: string
+              type: array
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a social media
+      tags:
+      - Social Media
+    put:
+      consumes:
+      - application/json
+      description: Update a social media with the input payload
+      parameters:
+      - description: SocialMedia ID
+        in: path
+        name: socialmedia_id
+        required: true
+        type: string
+      - description: body data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/resource.InputSocialMedia'
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              items:
+                type: string
+              type: array
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update a social media
+      tags:
+      - Social Media
+  /api/v1/socialmedia/health:
+    get:
+      description: Test health without any input
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              items:
+                type: string
+              type: array
+            type: object
+      summary: Test health social media handler
+      tags:
+      - Social Media
+  /api/v1/user:
+    delete:
+      consumes:
+      - application/json
+      description: delete a user with the token
+      parameters:
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              items:
+                type: string
+              type: array
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a user
+      tags:
+      - User
+    put:
+      consumes:
+      - application/json
+      description: Update a user with the input payload
+      parameters:
+      - description: User ID
+        in: query
+        name: user_id
+        required: true
+        type: string
+      - description: body data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/resource.UpdateUser'
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              items:
+                type: string
+              type: array
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update a user
+      tags:
+      - User
+  /api/v1/user/health:
+    get:
+      description: Test health without any input
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              items:
+                type: string
+              type: array
+            type: object
+      summary: Test health user handler
+      tags:
+      - User
+  /api/v1/user/login:
+    post:
+      consumes:
+      - application/json
+      description: Login User  with the input payload
+      parameters:
+      - description: body data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/resource.LoginUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              items:
+                type: string
+              type: array
+            type: object
+      summary: Login a user
+      tags:
+      - User
+  /api/v1/user/register:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user with the input payload
+      parameters:
+      - description: body data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/resource.InputUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              items:
+                type: string
+              type: array
+            type: object
+      summary: Create a new user
+      tags:
+      - User
+swagger: "2.0"

@@ -24,12 +24,28 @@ func NewUserHandler() *UserHandler{
 	}
 }
 
+// Test Health User godoc
+// @Summary Test health user handler
+// @Description Test health without any input
+// @Tags User
+// @Produce json
+// @Success 200 {object} map[string][]string
+// @Router /api/v1/user/health [get]
 func HealthUser(c *gin.Context){
 	c.JSON(http.StatusOK, gin.H{
 		"message":"User Handler is ready!",
 	})
 }
 
+// CreateUser godoc
+// @Summary Create a new user
+// @Description Create a new user with the input payload
+// @Tags User
+// @Param data body resource.InputUser true "body data"
+// @Accept json
+// @Produce json
+// @Success 200 {object} map[string][]string
+// @Router /api/v1/user/register [post]
 func (h *UserHandler) CreateUser(c *gin.Context){
 	repo := h.repo
 
@@ -83,11 +99,20 @@ func (h *UserHandler) CreateUser(c *gin.Context){
 		"age":res.Age,
 	}
 
-	response := helpers.APIResponse("Success", http.StatusOK,0,0,0, data)
+	response := helpers.APIResponse("Success", http.StatusOK, data)
 	c.JSON(http.StatusOK, response)
 
 }
 
+// LoginUser godoc
+// @Summary Login a user
+// @Description Login User  with the input payload
+// @Tags User
+// @Param data body resource.LoginUser true "body data"
+// @Accept json
+// @Produce json
+// @Success 200 {object} map[string][]string
+// @Router /api/v1/user/login [post]
 func (h *UserHandler) LoginUser(c *gin.Context){
 	repo :=h.repo
 
@@ -151,9 +176,23 @@ func (h *UserHandler) LoginUser(c *gin.Context){
 	c.JSON(http.StatusOK, response)
 }
 
+
+// UpdateUser godoc
+// @Summary Update a user
+// @Description Update a user with the input payload
+// @Tags User
+// @Param user_id query string true "User ID"
+// @Param data body resource.UpdateUser true "body data"
+// @Security ApiKeyAuth
+// @Param Authorization header string true "Authorization"
+// @Accept json
+// @Produce json
+// @Success 200 {object} map[string][]string
+// @Router /api/v1/user [put]
 func(h *UserHandler) UpdateUser(c *gin.Context){
 	repo :=h.repo
 	user_id,_ := strconv.ParseUint(c.DefaultQuery("user_id","0"), 10, 64)
+	fmt.Println(user_id)
 	var req resource.UpdateUser
 	err := c.ShouldBind(&req)
 	if err != nil {
@@ -227,10 +266,19 @@ func(h *UserHandler) UpdateUser(c *gin.Context){
 		"age":dataUser.Age,
 		"updated_at":update.UpdatedAt,
 	}
-	response := helpers.APIResponse("Success", http.StatusOK,0,0,0, data)
+	response := helpers.APIResponse("Success", http.StatusOK,data)
 	c.JSON(http.StatusOK, response)
 }
-
+// DeleteUser godoc
+// @Summary Delete a user
+// @Description delete a user with the token
+// @Tags User
+// @Security ApiKeyAuth
+// @Param Authorization header string true "Authorization"
+// @Accept json
+// @Produce json
+// @Success 200 {object} map[string][]string
+// @Router /api/v1/user [delete]
 func(h *UserHandler) DeleteUser(c *gin.Context){
 	repo := h.repo
 	tokenHeader := c.Request.Header.Get("Authorization")
@@ -273,6 +321,6 @@ func(h *UserHandler) DeleteUser(c *gin.Context){
 	data := gin.H{
 		"message":"Your account has been successfuly deleted",
 	}
-	response := helpers.APIResponse("Success", http.StatusOK,0,0,0, data)
+	response := helpers.APIResponse("Success", http.StatusOK,data)
 	c.JSON(http.StatusOK, response)
 }

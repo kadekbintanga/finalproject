@@ -24,12 +24,30 @@ func NewSocialMediaHandler() *SocialMediaHandler{
 	}
 }
 
+// Test Health Social Media godoc
+// @Summary Test health social media handler
+// @Description Test health without any input
+// @Tags Social Media
+// @Produce json
+// @Success 200 {object} map[string][]string
+// @Router /api/v1/socialmedia/health [get]
 func HealthSocialMedia(c *gin.Context){
 	c.JSON(http.StatusOK, gin.H{
 		"message":"SocialMedia Handler is ready!",
 	})
 }
 
+// Create Social Media godoc
+// @Summary Create a social media
+// @Description Create a social media with the input payload
+// @Tags Social Media
+// @Param data body resource.InputSocialMedia true "body data"
+// @Security ApiKeyAuth
+// @Param Authorization header string true "Authorization"
+// @Accept json
+// @Produce json
+// @Success 200 {object} map[string][]string
+// @Router /api/v1/socialmedia [post]
 func (h *SocialMediaHandler) CreateSocialMedia(c *gin.Context){
 	repoUser := h.repo
 	repoSocialMedia := h.repoS
@@ -87,10 +105,19 @@ func (h *SocialMediaHandler) CreateSocialMedia(c *gin.Context){
 		"created_at": res.CreatedAt,
 	}
 
-	response := helpers.APIResponse("Success", http.StatusOK,0,0,0, data)
+	response := helpers.APIResponse("Success", http.StatusOK, data)
 	c.JSON(http.StatusOK, response)
 }
 
+// Get User Social Media godoc
+// @Summary Get user social media
+// @Description Get social media with bearer token
+// @Tags Social Media
+// @Security ApiKeyAuth
+// @Param Authorization header string true "Authorization"
+// @Produce json
+// @Success 200 {object} map[string][]string
+// @Router /api/v1/socialmedia [get]
 func (h *SocialMediaHandler) GetSocialMedia(c *gin.Context){
 	repoUser := h.repo
 	repoSocialMedia := h.repoS
@@ -142,10 +169,22 @@ func (h *SocialMediaHandler) GetSocialMedia(c *gin.Context){
 		data = append(data, d)
 	}
 
-	response := helpers.APIResponse("Success", http.StatusOK,0,0,0, data)
+	response := helpers.APIResponse("Success", http.StatusOK, data)
 	c.JSON(http.StatusOK, response)
 }
 
+// Update Social Media godoc
+// @Summary Update a social media
+// @Description Update a social media with the input payload
+// @Tags Social Media
+// @Param socialmedia_id path string true "SocialMedia ID"
+// @Param data body resource.InputSocialMedia true "body data"
+// @Security ApiKeyAuth
+// @Param Authorization header string true "Authorization"
+// @Accept json
+// @Produce json
+// @Success 200 {object} map[string][]string
+// @Router /api/v1/socialmedia/{socialmedia_id} [put]
 func(h *SocialMediaHandler) UpdateSocialMedia(c *gin.Context){
 	repoSocialMedia := h.repoS
 	repoUser := h.repo
@@ -233,10 +272,21 @@ func(h *SocialMediaHandler) UpdateSocialMedia(c *gin.Context){
 		"updated_at": update.UpdatedAt,
 	}
 
-	response := helpers.APIResponse("Success", http.StatusOK,0,0,0, data)
+	response := helpers.APIResponse("Success", http.StatusOK,data)
 	c.JSON(http.StatusOK, response)
 }
 
+// Delete Social Media godoc
+// @Summary Delete a social media
+// @Description delete a social media with the token
+// @Tags Social Media
+// @Param socialmedia_id path string true "SocialMedia ID"
+// @Security ApiKeyAuth
+// @Param Authorization header string true "Authorization"
+// @Accept json
+// @Produce json
+// @Success 200 {object} map[string][]string
+// @Router /api/v1/socialmedia/{socialmedia_id} [delete]
 func(h *SocialMediaHandler) DeleteSocialMedia(c *gin.Context){
 	repoSocialMedia := h.repoS
 	repoUser := h.repo
@@ -304,6 +354,6 @@ func(h *SocialMediaHandler) DeleteSocialMedia(c *gin.Context){
 	data := gin.H{
 		"message":"Your social media has been successfuly deleted",
 	}
-	response := helpers.APIResponse("Success", http.StatusOK,0,0,0, data)
+	response := helpers.APIResponse("Success", http.StatusOK,data)
 	c.JSON(http.StatusOK, response)
 }

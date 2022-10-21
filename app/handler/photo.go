@@ -25,12 +25,30 @@ func NewPhotoHandler() *PhotoHandler{
 	}
 }
 
+// Test Health Photo godoc
+// @Summary Test health photo handler
+// @Description Test health without any input
+// @Tags Photo
+// @Produce json
+// @Success 200 {object} map[string][]string
+// @Router /api/v1/photo/health [get]
 func HealthPhoto(c *gin.Context){
 	c.JSON(http.StatusOK, gin.H{
 		"message":"Photo Handler is ready!",
 	})
 }
 
+// Create Photo godoc
+// @Summary Create a photo
+// @Description Create a photo with the input payload
+// @Tags Photo
+// @Param data body resource.InputPhoto true "body data"
+// @Security ApiKeyAuth
+// @Param Authorization header string true "Authorization"
+// @Accept json
+// @Produce json
+// @Success 200 {object} map[string][]string
+// @Router /api/v1/photo [post]
 func (h *PhotoHandler) CreatePhoto(c *gin.Context){
 	repoUser := h.repo
 	repoPhoto := h.repoP
@@ -88,10 +106,19 @@ func (h *PhotoHandler) CreatePhoto(c *gin.Context){
 		"user_id":res.UserID,
 		"created_at":res.CreatedAt,
 	}
-	response := helpers.APIResponse("Success", http.StatusOK,0,0,0, data)
+	response := helpers.APIResponse("Success", http.StatusOK,data)
 	c.JSON(http.StatusOK, response)
 }
 
+// Get User Photo godoc
+// @Summary Get user photo
+// @Description Get photo with bearer token
+// @Tags Photo
+// @Security ApiKeyAuth
+// @Param Authorization header string true "Authorization"
+// @Produce json
+// @Success 200 {object} map[string][]string
+// @Router /api/v1/photo [get]
 func (h *PhotoHandler) GetPhotoUser(c *gin.Context){
 	repoUser := h.repo
 	repoPhoto := h.repoP
@@ -145,10 +172,19 @@ func (h *PhotoHandler) GetPhotoUser(c *gin.Context){
 	}
 
 
-	response := helpers.APIResponse("Success", http.StatusOK,0,0,0, data)
+	response := helpers.APIResponse("Success", http.StatusOK,data)
 	c.JSON(http.StatusOK, response)
 }
 
+// Get All  Photo godoc
+// @Summary Get all  photo handler
+// @Description Get all photo  without any input
+// @Tags Photo
+// @Security ApiKeyAuth
+// @Param Authorization header string true "Authorization"
+// @Produce json
+// @Success 200 {object} map[string][]string
+// @Router /api/v1/allphoto [get]
 func (h *PhotoHandler) GetAllPhoto(c *gin.Context){
 	repoPhoto := h.repoP
 	result, err := repoPhoto.GetAllPhoto()
@@ -178,10 +214,22 @@ func (h *PhotoHandler) GetAllPhoto(c *gin.Context){
 		data = append(data, d)
 	}
 
-	response := helpers.APIResponse("Success", http.StatusOK,0,0,0, data)
+	response := helpers.APIResponse("Success", http.StatusOK,data)
 	c.JSON(http.StatusOK, response)
 }
 
+// UpdatePhoto godoc
+// @Summary Update a photo
+// @Description Update a photo with the input payload
+// @Tags Photo
+// @Param photo_id path string true "Photo ID"
+// @Param data body resource.InputPhoto true "body data"
+// @Security ApiKeyAuth
+// @Param Authorization header string true "Authorization"
+// @Accept json
+// @Produce json
+// @Success 200 {object} map[string][]string
+// @Router /api/v1/photo/{photo_id} [put]
 func (h *PhotoHandler) UpdatePhoto(c *gin.Context){
 	repoUser := h.repo
 	repoPhoto := h.repoP
@@ -270,10 +318,21 @@ func (h *PhotoHandler) UpdatePhoto(c *gin.Context){
 		"updated_at": update.UpdatedAt,
 	}
 
-	response := helpers.APIResponse("Success", http.StatusOK,0,0,0, data)
+	response := helpers.APIResponse("Success", http.StatusOK,data)
 	c.JSON(http.StatusOK, response)
 }
 
+// DeletePhoto godoc
+// @Summary Delete a photo
+// @Description delete a photo with the token
+// @Tags Photo
+// @Param photo_id path string true "Photo ID"
+// @Security ApiKeyAuth
+// @Param Authorization header string true "Authorization"
+// @Accept json
+// @Produce json
+// @Success 200 {object} map[string][]string
+// @Router /api/v1/photo/{photo_id} [delete]
 func(h *PhotoHandler) DeletePhoto(c *gin.Context){
 	repoUser := h.repo
 	repoPhoto := h.repoP
@@ -344,6 +403,6 @@ func(h *PhotoHandler) DeletePhoto(c *gin.Context){
 	data := gin.H{
 		"message":"Your photo has been successfuly deleted",
 	}
-	response := helpers.APIResponse("Success", http.StatusOK,0,0,0, data)
+	response := helpers.APIResponse("Success", http.StatusOK,data)
 	c.JSON(http.StatusOK, response)
 }

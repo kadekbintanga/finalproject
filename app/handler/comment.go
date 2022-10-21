@@ -26,12 +26,30 @@ func NewCommentHandler() *CommentHandler{
 	}
 }
 
+// Test Health Comment godoc
+// @Summary Test health comment handler
+// @Description Test health without any input
+// @Tags Comment
+// @Produce json
+// @Success 200 {object} map[string][]string
+// @Router /api/v1/comment/health [get]
 func HealthComment(c *gin.Context){
 	c.JSON(http.StatusOK, gin.H{
 		"message":"Comment Handler is ready!",
 	})
 }
 
+// Create Comment godoc
+// @Summary Create a comment
+// @Description Create a photo with the input payload
+// @Tags Comment
+// @Param data body resource.InputComment true "body data"
+// @Security ApiKeyAuth
+// @Param Authorization header string true "Authorization"
+// @Accept json
+// @Produce json
+// @Success 200 {object} map[string][]string
+// @Router /api/v1/comment [post]
 func (h *CommentHandler) CreateComment(c *gin.Context){
 	repoUser := h.repo
 	repoPhoto := h.repoP
@@ -108,10 +126,20 @@ func (h *CommentHandler) CreateComment(c *gin.Context){
 		"created_at": res.CreatedAt,
 	}
 
-	response := helpers.APIResponse("Success", http.StatusOK,0,0,0, data)
+	response := helpers.APIResponse("Success", http.StatusOK,data)
 	c.JSON(http.StatusOK, response)
 }
 
+// Get Comment godoc
+// @Summary Get comment
+// @Description Get comment with bearer token
+// @Tags Comment
+// @Param photo_id path string true "Photo ID"
+// @Security ApiKeyAuth
+// @Param Authorization header string true "Authorization"
+// @Produce json
+// @Success 200 {object} map[string][]string
+// @Router /api/v1/comment/{photo_id} [get]
 func(h *CommentHandler) GetComment(c *gin.Context){
 	repoComment := h.repoC
 	photoId,_ := strconv.ParseUint(c.Param("photo_id"),10,64)
@@ -152,10 +180,22 @@ func(h *CommentHandler) GetComment(c *gin.Context){
 	}
 
 
-	response := helpers.APIResponse("Success", http.StatusOK,0,0,0, data)
+	response := helpers.APIResponse("Success", http.StatusOK,data)
 	c.JSON(http.StatusOK, response)
 }
 
+// UpdateComment godoc
+// @Summary Update a comment
+// @Description Update a comment with the input payload
+// @Tags Comment
+// @Param comment_id path string true "Comment ID"
+// @Param data body resource.UpdateComment true "body data"
+// @Security ApiKeyAuth
+// @Param Authorization header string true "Authorization"
+// @Accept json
+// @Produce json
+// @Success 200 {object} map[string][]string
+// @Router /api/v1/comment/{comment_id} [put]
 func (h *CommentHandler) UpdateComment(c *gin.Context){
 	repoComment:= h.repoC
 	repoUser := h.repo
@@ -244,10 +284,21 @@ func (h *CommentHandler) UpdateComment(c *gin.Context){
 		"update_at": update.UpdatedAt,
 	}
 
-	response := helpers.APIResponse("Success", http.StatusOK,0,0,0, data)
+	response := helpers.APIResponse("Success", http.StatusOK,data)
 	c.JSON(http.StatusOK, response)
 }
 
+// DeleteComment godoc
+// @Summary Delete a comment
+// @Description delete a comment with the token
+// @Tags Comment
+// @Param comment_id path string true "Comment ID"
+// @Security ApiKeyAuth
+// @Param Authorization header string true "Authorization"
+// @Accept json
+// @Produce json
+// @Success 200 {object} map[string][]string
+// @Router /api/v1/comment/{comment_id} [delete]
 func(h *CommentHandler) DeleteComment(c *gin.Context){
 	repoComment := h.repoC
 	repoUser := h.repo
@@ -316,6 +367,6 @@ func(h *CommentHandler) DeleteComment(c *gin.Context){
 	data := gin.H{
 		"message":"Your comment has been successfuly deleted",
 	}
-	response := helpers.APIResponse("Success", http.StatusOK,0,0,0, data)
+	response := helpers.APIResponse("Success", http.StatusOK,data)
 	c.JSON(http.StatusOK, response)
 }

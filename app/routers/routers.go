@@ -8,8 +8,10 @@ import(
 	"finalproject/app/middleware"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"os"
 )
 
+var PORT = os.Getenv("DB_PORT")
 
 
 func InitRouter(){
@@ -51,5 +53,9 @@ func InitRouter(){
 	api.DELETE("/socialmedia/:socialmedia_id", middleware.CheckAuth, SocialMediaHandler.DeleteSocialMedia)
 
 	api.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
-	r.Run()
+
+	// For local
+	// r.Run()
+	// For deploy
+	r.Run(":"+ PORT)
 }

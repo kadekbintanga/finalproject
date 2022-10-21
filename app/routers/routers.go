@@ -57,5 +57,5 @@ func InitRouter(){
 	// For local
 	// r.Run()
 	// For deploy
-	r.Run(":"+ PORT)
+	r.Run(":80")
 }
